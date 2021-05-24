@@ -1,0 +1,125 @@
+*******************************************************************************************************************************************************
+**************************************************   Chuletario de Métodos de Java8   *****************************************************************
+*******************************************************************************************************************************************************
+
+AUTOR: Martin Amezola Fernandez
+
+stream() = Equivale a un Iterador, va recogiendo todos los elementos de una lista para luego hacer algo con ellos en funciones que siguen a ésta.
+
+	Por ejemplo:
+
+	En la universidad, tenemos alumnos y cada alumno tiene su lista de entregables, que es un ArrayList<Entregables>. Tenemos que recorrer esa
+	lista y ver si el alumno en cuestión ha aprobado todos los entregables o no. Hacemos lo siguiente: 
+
+		return listaEntregables.stream().allMatch(e -> e.getNota()>=5);
+		
+	De esta manera, con stream() vamos recorriendo todos los entregables como si se tratara de un enhanced for o un iterador normal, y en cada
+	uno aplicamos el método allMatch() para ver si la condición de dentro del allMatch() se cumple en todos los entregables de la lista.
+	
+	
+allMatch() = Se utiliza normalmente detrás de stream(), y es para saber si todos los elementos de la lista que se está streameando cumplen la
+	condición que se menciona dentro de los paréntesis.
+	
+	Por ejemplo:
+	
+	**Mirar ejemplo de stream()**
+	
+anyMatch() = Se utiliza normalmente detrás de stream(), y es para saber si alguno de los elementos de la lista que se está streameando cumplen la
+	condición que se menciona dentro de los paréntesis. Si es así devuelve true.
+	
+	** Mirar ejemplo de stream() es igual que allMatch solo que con que uno cumpla ya devuelve true **
+	
+	
+forEach() = Para hacer algo a todos los elementos de la lista que estamos recorriendo, por ejemplo, imprimirlos.
+
+
+
+map() = En general, para cambiar de tipo de lista que estamos recorriendo. Si estamos recorriendo una lista de Alumnos, y queremos hacer una lista de
+	sus nombres, usamos map(Alumno::getNombre) por ejemplo. Hay más variaciones por si queremos una lista de double's, que sería mapToDouble() o 
+	si queremos una lista de enteros mapToInt().
+	
+mapToDouble() = Para transformar la lista que estamos recorriendo a una lista de tipo double. 
+
+	Por ejemplo:
+	
+		return listaAlumnos.stream().mapToDouble(Alumno::getNotaFinal).collect(Collectors.toList());
+
+
+mapToInt() =  Para transformar la lista que estamos recorriendo a una lista de tipo double. 
+
+	Por ejemplo:
+	
+		return listaAlumnos.stream().mapToInt(Alumno::getId).collect(Collectors.toList());
+		
+collect() = Para recoger los resultados de todo el stream() que hemos hecho en una lista de un tipo, por ejemplo de tipo List o ArrayList.
+
+	Por ejemplo:
+	
+		return listaAlumnos.stream().mapToDouble(Alumno::getNotaFinal).collect(Collectors.toList());
+		
+	Hay algunas variaciones:
+
+	partitioningBy =  Si queremos una lista de gente que ha aprobado, pero tambien de la gente que ha suspendido, es decir,
+	si queremos un Mapa tipo Map<Boolean, List<Alumno>> para tener todos los alumnos juntos pero "separados" en aprobados o no, usamos 
+	partitioningBy.
+	
+		return listaAlumnos.stream().collect(partitioningBy(Alumno::haAprobado));
+		
+
+	groupingBy = Para agrupar en base a algo, es decir, en el anterior, diferenciabamos que fueran alumnos aprobados o no. Aquí, separamos
+	en varios subgrupos. Por ejemplo, hacemos subgrupos de los estudiantes de la universidad dividiendolos por su ciudad de origen. Y 
+	lo devolvemos en un mapa Map<String, List<Alumno>>.
+	
+		return listaAlumnos.stream().collect(groupingBy(Alumno::getCiudad));
+		
+		
+		Dentro del groupingBy además, podemos aplicar el averagingDouble para sacar la media de los estudiantes por ciudades y tener
+		un mapa así Map<Ciudad, NotaMedia> osea de tipo Map<String, Double>. Esto ya sé que es un poco fumadón pero sería algo así:
+		
+		return listaAlumnos.stream().collect(groupingBy(Alumno::getCiudad, averagingDouble(Alumno::calcularNotaFinal)));
+		
+sorted() = Para ordenar listas en base a un atributo, por ejemplo una lista de alumnos por su nombre, o nombre y apellido.
+	
+	Por ejemplo:
+	- Para ordenar en base al nombre:
+		
+		return listaAlumnos.sorted(Comparator.comparing(Alumno::getNombre)).collect(Collectors.toList());
+	
+	- Para ordenar en base al nombre y el apellido: Usamos .thenComparing()
+	
+		return listaAlumnos.stream().sorted(Comparator.comparing(Alumno::getNombre).thenComparing(Alumno::getApellido)).collect(Collectors.toList());
+		
+count() = Para que te cuente el numero de elementos del stream que has hecho, por ejemplo si has filtrado los alumnos aprobados pues cuenta cuántos han aprobado.
+
+	Por ejemplo:
+
+		return listaAlumnos.stream().filter(Alumno::haAprobado).count();
+		
+distinct() = Quita los elementos repetidos de una lista.
+	
+	Por ejemplo: Si estamos recorriendo la lista de alumnos de una universidad, y queremos una lista de sus ciudades, pero sin que se repitan las ciudades
+	podemos usar distinct() para eliminar las ciudades repetidas.
+	
+		return listaAlumnos.stream().map(Alumno::getCiudad).distinct().collect(Collectors.toList());
+		
+
+filter() = Sirve para filtrar en la lista que estás recorriendo los elementos en base a si cumplen o no algo.
+
+	Por ejemplo: Filtramos la lista de alumnos y cogemos solo los alumnos que han aprobado, los metemos en una lista aparte.
+	
+		// Usando la expresión lambda dentro del filter()
+		
+		return listaAlumnos.stream().filter(x -> x.haAprobado()).collect(Collectors.toList());
+		
+		// Usando ::
+		
+		return listaAlumnos.stream().filter(Alumno::haAprobado()).collect(Collectors.toList());
+
+summmaryStatistics() = Se utiliza en una lista de int o de double. Devuelve un objeto de tipo DoubleSummaryStatistics si es double y IntSummaryStatistics si
+	es un int. De ese objeto luego podemos sacar getMax(), getMin() y getAverage().
+	
+	Por ejemplo: De todas las notas finales de los alumnnos, queremos la nota máxima, la mínima y la nota media.
+	
+		DoubleSummaryStatistics st = listaAlumnnos.stream().mapToDouble(Alumno::getNotaFinal).summaryStatistics();
+		
+
